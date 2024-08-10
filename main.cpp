@@ -13,6 +13,8 @@ int main(){
 	int nPhotons = 10000;
 	double domainRadius = 50.;
 	double gasTemperatureKeV = 0.001;
+	double coupledEnergy = 0.;
+	double photonEnergyInitial = 14.;
 
 	double electronDir[3] = {0.,0.,0.};
 	std::vector<double> energyOut;
@@ -29,7 +31,7 @@ int main(){
 
     for(int iphoton = 0; iphoton < nPhotons; iphoton++){
 
-    	double photonEnergy = 15;
+    	double photonEnergy = photonEnergyInitial;
     	double photonPosition[3] = {0.,0.,0.};
     	double photonDir[3] = {0.,0.,0.};
 
@@ -63,6 +65,7 @@ int main(){
     		photonPosition[2] += criticalOpticalDepth * photonDir[2];
 
     		if((photonPosition[0]*photonPosition[0] + photonPosition[1]*photonPosition[1] + photonPosition[2]*photonPosition[2]) > std::pow(domainRadius,2)){
+    			coupledEnergy += 1 - photonEnergy/photonEnergyInitial;
         		energyOut.push_back(photonEnergy);
     			break;
     		}
@@ -76,7 +79,7 @@ int main(){
 
     outputFile.close();
 
-    std::cout << "Vector has been written to output.txt" << std::endl;
+    std::cout << "coupled energy = " << coupledEnergy/nPhotons << std::endl;
 
 	return 0;
 }
