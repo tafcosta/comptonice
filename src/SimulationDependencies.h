@@ -11,5 +11,6 @@
 #include <iostream>
 #include <cstdio>
 #include <random>
+#include <fstream>
 
 #endif /* SRC_SIMULATIONDEPENDENCIES_H_ */

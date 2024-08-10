@@ -1,28 +1,24 @@
 #include "SimulationDependencies.h"
 
-double getElectronSpeed(double gasTemperatureKeV, double randomNumber);
+double getElectronSpeed(double gasTemperatureKeV);
+double getScatteringAngle(double photonEnergy);
+double KleinNishinaCumulativeDistribution(double photonEnergy, double theta);
 double MaxwellBoltzmannCumulativeDistribution(double beta, double gasTemperatureKeV);
+
 static double electronRestMassEnergyKeV = 511.;
-static double MinBeta = 0.;
-static double MaxBeta = 1.;
 static double TOL = 0.0001;
 
 int main(){
 
+	int nPhotons = 10000;
+	double domainRadius = 50.;
 	double gasTemperatureKeV = 0.001;
+	double coupledEnergy = 0.;
+	double photonEnergyInitial = 14.;
 
-	double photonPosition[3] = {0.,0.,0.};
-	double photonDir[3] = {0.,0.,0.};
 	double electronDir[3] = {0.,0.,0.};
-	double electronSpeed = 0.;
-
-	double photonEnergy = 10.0;
-	int propagatePhoton = 1;
-	int numberScatterings = 0;
-	double randomNumber = 1;
-	double criticalOpticalDepth, phi, theta, scatteringAngle;
-
-
+	std::vector<double> energyOut;
+	double criticalOpticalDepth, phi, theta;
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -31,49 +27,73 @@ int main(){
     std::uniform_real_distribution<> inclination(-1., 1.);
 
 
-	while(propagatePhoton){
+    std::ofstream outputFile("outputEnergy.txt");
 
-		phi   = azimuth(gen);
-		theta = std::acos(inclination(gen));
+    for(int iphoton = 0; iphoton < nPhotons; iphoton++){
 
-		electronDir[0] = std::sin(theta) * std::cos(phi);
-		electronDir[1] = std::sin(theta) * std::sin(phi);
-		electronDir[2] = std::cos(theta);
+    	double photonEnergy = photonEnergyInitial;
+    	double photonPosition[3] = {0.,0.,0.};
+    	double photonDir[3] = {0.,0.,0.};
 
-		randomNumber  = DistributionZeroToOne(gen);
-		electronSpeed = getElectronSpeed(gasTemperatureKeV, randomNumber);
+    	while(int propagatePhoton = 1){
 
+    		criticalOpticalDepth = -std::log(1 - DistributionZeroToOne(gen));
 
+    		/*
+    		phi   = azimuth(gen);
+    		theta = std::acos(inclination(gen));
 
+    		electronDir[0] = std::sin(theta) * std::cos(phi);
+    		electronDir[1] = std::sin(theta) * std::sin(phi);
+    		electronDir[2] = std::cos(theta);
 
-		criticalOpticalDepth = -std::log(1 - DistributionZeroToOne(gen));
-		phi   = azimuth(gen);
-		theta = std::acos(inclination(gen));
+    		double electronSpeed = getElectronSpeed(gasTemperatureKeV);
+    		 */
 
-		scatteringAngle = std::sin(theta) * std::cos(phi) * photonDir[0] + std::sin(theta) * std::sin(phi) * photonDir[1] +  std::cos(theta) * photonDir[2];
-		photonEnergy = photonEnergy / (1 + photonEnergy/electronRestMassEnergyKeV * (1 - std::cos(scatteringAngle)));
+    		phi   = azimuth(gen);
+    		theta = getScatteringAngle(photonEnergy);
 
-		photonDir[0] = std::sin(theta) * std::cos(phi);
-		photonDir[1] = std::sin(theta) * std::sin(phi);
-		photonDir[2] = std::cos(theta);
+    		double scatteringAngle = std::sin(theta) * std::cos(phi) * photonDir[0] + std::sin(theta) * std::sin(phi) * photonDir[1] +  std::cos(theta) * photonDir[2];
+    		photonEnergy = photonEnergy / (1 + photonEnergy/electronRestMassEnergyKeV * (1 - std::cos(scatteringAngle)));
 
-		photonPosition[0] += criticalOpticalDepth * photonDir[0];
-		photonPosition[1] += criticalOpticalDepth * photonDir[1];
-		photonPosition[2] += criticalOpticalDepth * photonDir[2];
+    		photonDir[0] = std::sin(theta) * std::cos(phi);
+    		photonDir[1] = std::sin(theta) * std::sin(phi);
+    		photonDir[2] = std::cos(theta);
 
-		numberScatterings += 1;
+    		photonPosition[0] += criticalOpticalDepth * photonDir[0];
+    		photonPosition[1] += criticalOpticalDepth * photonDir[1];
+    		photonPosition[2] += criticalOpticalDepth * photonDir[2];
 
-		if((photonPosition[0]*photonPosition[0] + photonPosition[1]*photonPosition[1] + photonPosition[2]*photonPosition[2]) > 100.)
-			break;
+    		if((photonPosition[0]*photonPosition[0] + photonPosition[1]*photonPosition[1] + photonPosition[2]*photonPosition[2]) > std::pow(domainRadius,2)){
+    			coupledEnergy += 1 - photonEnergy/photonEnergyInitial;
+        		energyOut.push_back(photonEnergy);
+    			break;
+    		}
+
+    	}
 	}
 
-	std::cout << photonEnergy << " " << numberScatterings << std::endl;
+    for (const double& element : energyOut) {
+        outputFile << element << " ";
+    }
+
+    outputFile.close();
+
+    std::cout << "coupled energy = " << coupledEnergy/nPhotons << std::endl;
 
 	return 0;
 }
 
-double getElectronSpeed(double gasTemperatureKeV, double randomNumber){
-	double electronSpeed;
+double getElectronSpeed(double gasTemperatureKeV){
+	double electronSpeed = 0.;
+	double MinBeta  = 0.;
+	double MaxBeta  = 1.;
+
+    std::random_device rd;
+    std::uniform_real_distribution<> DistributionZeroToOne(0.0, 1.0);
+    std::mt19937 gen(rd());
+
+    double randomNumber = DistributionZeroToOne(gen);
 
 	for(int nIter = 0; nIter < 100; nIter++){
 		double lowerLimit = MaxwellBoltzmannCumulativeDistribution(MinBeta, gasTemperatureKeV) - randomNumber;
@@ -91,6 +111,46 @@ double getElectronSpeed(double gasTemperatureKeV, double randomNumber){
 	}
 
 	return electronSpeed;
+}
+
+double getScatteringAngle(double photonEnergy){
+	double ScatteringAngle = 0.;
+	double MinAngle = 0.;
+	double MaxAngle = M_PI;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> DistributionZeroToOne(0.0, 1.0);
+
+    double randomNumber = DistributionZeroToOne(gen);
+
+	for(int nIter = 0; nIter < 100; nIter++){
+		double lowerLimit = KleinNishinaCumulativeDistribution(photonEnergy, MinAngle) - randomNumber;
+		double midPoint   = KleinNishinaCumulativeDistribution(photonEnergy, (MinAngle + MaxAngle)/2.) - randomNumber;
+
+		if((midPoint == 0) || (MaxAngle - MinAngle)/2. < TOL){
+			ScatteringAngle = (MinAngle+ MaxAngle)/2.;
+			break;
+		}
+
+		if(lowerLimit * midPoint > 0)
+			MinAngle = (MinAngle + MaxAngle)/2.;
+		else
+			MaxAngle = (MinAngle + MaxAngle)/2.;
+	}
+
+	return ScatteringAngle;
+
+}
+
+double KleinNishinaCumulativeDistribution(double photonEnergy, double theta){
+	double x = photonEnergy/electronRestMassEnergyKeV;
+	double norm = 3./4 * ((1 + x)/std::pow(x,3) * (2*x * (1+x)/(1 + 2*x) - std::log(1 + 2*x)) + std::log(1 + 2*x) /(2*x) - (1 + 3*x)/std::pow(1 + 2*x,2));
+
+	return ((2 + 6*x + std::pow(x,2)) / (2. * std::pow(x,3)) \
+			+ (-2*x * std::cos(theta) + (-2. - 6*x - 5 * std::pow(x,2) + 2*x * (1 + 2*x) * std::cos(theta)) / std::pow(1 + x - x*std::cos(theta),2) \
+			+ 2 * (-2. - 2*x + std::pow(x,2)) * std::log(1 + x - x * std::cos(theta)))/(2. * std::pow(x,3))) * 3/8./norm;
+
 }
 
 double MaxwellBoltzmannCumulativeDistribution(double beta, double gasTemperatureKeV){
