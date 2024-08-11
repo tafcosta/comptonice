@@ -1,20 +1,21 @@
 #include "SimulationDependencies.h"
 
+double energyChangeCompton(double photonEnergy, double scatteringAngle);
 double getElectronSpeed(double gasTemperatureKeV);
+double getInitialPhotonEnergy(void);
 double getScatteringAngle(double photonEnergy);
 double KleinNishinaCumulativeDistribution(double photonEnergy, double theta);
 double MaxwellBoltzmannCumulativeDistribution(double beta, double gasTemperatureKeV);
 
-static double electronRestMassEnergyKeV = 511.;
+static double electronRestMassEnergyKeV = 511.0;
 static double TOL = 0.0001;
 
 int main(){
 
-	int nPhotons = 10000;
-	double domainRadius = 50.;
+	int nPhotons = 30000;
+	double domainRadius = 30.;
 	double gasTemperatureKeV = 0.001;
 	double coupledEnergy = 0.;
-	double photonEnergyInitial = 14.;
 
 	double electronDir[3] = {0.,0.,0.};
 	std::vector<double> energyOut;
@@ -31,10 +32,11 @@ int main(){
 
     for(int iphoton = 0; iphoton < nPhotons; iphoton++){
 
-    	double photonEnergy = photonEnergyInitial;
+    	double photonEnergyInitial = getInitialPhotonEnergy();
     	double photonPosition[3] = {0.,0.,0.};
     	double photonDir[3] = {0.,0.,0.};
 
+    	double photonEnergy = photonEnergyInitial;
     	while(int propagatePhoton = 1){
 
     		criticalOpticalDepth = -std::log(1 - DistributionZeroToOne(gen));
@@ -53,9 +55,6 @@ int main(){
     		phi   = azimuth(gen);
     		theta = getScatteringAngle(photonEnergy);
 
-    		double scatteringAngle = std::sin(theta) * std::cos(phi) * photonDir[0] + std::sin(theta) * std::sin(phi) * photonDir[1] +  std::cos(theta) * photonDir[2];
-    		photonEnergy = photonEnergy / (1 + photonEnergy/electronRestMassEnergyKeV * (1 - std::cos(scatteringAngle)));
-
     		photonDir[0] = std::sin(theta) * std::cos(phi);
     		photonDir[1] = std::sin(theta) * std::sin(phi);
     		photonDir[2] = std::cos(theta);
@@ -65,10 +64,13 @@ int main(){
     		photonPosition[2] += criticalOpticalDepth * photonDir[2];
 
     		if((photonPosition[0]*photonPosition[0] + photonPosition[1]*photonPosition[1] + photonPosition[2]*photonPosition[2]) > std::pow(domainRadius,2)){
-    			coupledEnergy += 1 - photonEnergy/photonEnergyInitial;
         		energyOut.push_back(photonEnergy);
+    			coupledEnergy += 1 - photonEnergy/photonEnergyInitial;
     			break;
     		}
+
+    		double scatteringAngle = std::sin(theta) * std::cos(phi) * photonDir[0] + std::sin(theta) * std::sin(phi) * photonDir[1] +  std::cos(theta) * photonDir[2];
+    		photonEnergy = energyChangeCompton(photonEnergy, scatteringAngle);
 
     	}
 	}
@@ -82,6 +84,10 @@ int main(){
     std::cout << "coupled energy = " << coupledEnergy/nPhotons << std::endl;
 
 	return 0;
+}
+
+double energyChangeCompton(double photonEnergy, double scatteringAngle){
+	return photonEnergy / (1 + photonEnergy/electronRestMassEnergyKeV * (1 - std::cos(scatteringAngle)));
 }
 
 double getElectronSpeed(double gasTemperatureKeV){
@@ -111,6 +117,20 @@ double getElectronSpeed(double gasTemperatureKeV){
 	}
 
 	return electronSpeed;
+}
+
+double getInitialPhotonEnergy(void){
+	double minEnergy = 4.;
+	double maxEnergy = 14.;
+
+	double norm = 1/(std::log(maxEnergy) - std::log(minEnergy));
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> DistributionZeroToOne(0.0, 1.0);
+
+    return minEnergy * std::pow(maxEnergy/minEnergy, DistributionZeroToOne(gen));
+
 }
 
 double getScatteringAngle(double photonEnergy){
