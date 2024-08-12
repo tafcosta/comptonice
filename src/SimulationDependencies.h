@@ -13,4 +13,8 @@
 #include <random>
 #include <fstream>
 
+#include "PhotonSpectrum.h"
+#include "PhotonSpectrumPowerLaw.h"
+
+
 #endif /* SRC_SIMULATIONDEPENDENCIES_H_ */

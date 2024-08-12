@@ -2,7 +2,6 @@
 
 double energyChangeCompton(double photonEnergy, double scatteringAngle);
 double getElectronSpeed(double gasTemperatureKeV);
-double getInitialPhotonEnergy(void);
 double getScatteringAngleLabFrame(double thetaLab, double scatteringAngle);
 double getScatteringAnglePhotonFrame(double photonEnergy);
 void initialisePhotonDir(double (&photonDir)[3]);
@@ -11,6 +10,8 @@ double MaxwellBoltzmannCumulativeDistribution(double beta, double gasTemperature
 
 static double electronRestMassEnergyKeV = 511.0;
 static double TOL = 0.0001;
+
+PhotonSpectrum *photonSpectrum = new PhotonSpectrumPowerLaw();
 
 int main(){
 
@@ -32,8 +33,9 @@ int main(){
     std::ofstream outputFile("outputEnergy.txt");
 
     for(int iphoton = 0; iphoton < nPhotons; iphoton++){
-    	double photonEnergyInitial = getInitialPhotonEnergy();
+    	double photonEnergyInitial = photonSpectrum->setInitialPhotonEnergy();
     	double photonEnergy = photonEnergyInitial;
+
     	double photonPosition[3] = {0.,0.,0.};
     	double photonDir[3];
 
@@ -85,6 +87,7 @@ int main(){
 
     std::cout << "coupled energy = " << coupledEnergy/nPhotons << std::endl;
 
+    delete photonSpectrum;
 	return 0;
 }
 
@@ -119,18 +122,6 @@ double getElectronSpeed(double gasTemperatureKeV){
 	}
 
 	return electronSpeed;
-}
-
-double getInitialPhotonEnergy(void){
-	double minEnergy = 4.;
-	double maxEnergy = 14.;
-
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<> DistributionZeroToOne(0.0, 1.0);
-
-    return minEnergy * std::pow(maxEnergy/minEnergy, DistributionZeroToOne(gen));
-
 }
 
 double getScatteringAngleLabFrame(double thetaLab, double scatteringAngle){
