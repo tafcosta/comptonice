@@ -3,7 +3,9 @@
 double energyChangeCompton(double photonEnergy, double scatteringAngle);
 double getElectronSpeed(double gasTemperatureKeV);
 double getInitialPhotonEnergy(void);
-double getScatteringAngle(double photonEnergy);
+double getScatteringAngleLabFrame(double thetaLab, double scatteringAngle);
+double getScatteringAnglePhotonFrame(double photonEnergy);
+void initialisePhotonDir(double (&photonDir)[3]);
 double KleinNishinaCumulativeDistribution(double photonEnergy, double theta);
 double MaxwellBoltzmannCumulativeDistribution(double beta, double gasTemperatureKeV);
 
@@ -13,33 +15,33 @@ static double TOL = 0.0001;
 int main(){
 
 	int nPhotons = 30000;
-	double domainRadius = 30.;
+	double domainRadius = 10.;
 	double gasTemperatureKeV = 0.001;
 	double coupledEnergy = 0.;
 
 	double electronDir[3] = {0.,0.,0.};
 	std::vector<double> energyOut;
-	double criticalOpticalDepth, phi, theta;
+	double criticalOpticalDepth, phi, thetaLab;
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_real_distribution<> DistributionZeroToOne(0.0, 1.0);
+    std::uniform_real_distribution<> RandomNumberZeroToOne(0.0, 1.0);
     std::uniform_real_distribution<> azimuth(0.0, 2 * M_PI);
     std::uniform_real_distribution<> inclination(-1., 1.);
-
 
     std::ofstream outputFile("outputEnergy.txt");
 
     for(int iphoton = 0; iphoton < nPhotons; iphoton++){
-
     	double photonEnergyInitial = getInitialPhotonEnergy();
-    	double photonPosition[3] = {0.,0.,0.};
-    	double photonDir[3] = {0.,0.,0.};
-
     	double photonEnergy = photonEnergyInitial;
+    	double photonPosition[3] = {0.,0.,0.};
+    	double photonDir[3];
+
+    	initialisePhotonDir((&photonDir)[3]);
+
     	while(int propagatePhoton = 1){
 
-    		criticalOpticalDepth = -std::log(1 - DistributionZeroToOne(gen));
+    		criticalOpticalDepth = -std::log(1 - RandomNumberZeroToOne(gen));
 
     		/*
     		phi   = azimuth(gen);
@@ -53,11 +55,12 @@ int main(){
     		 */
 
     		phi   = azimuth(gen);
-    		theta = getScatteringAngle(photonEnergy);
+    		double scatteringAngle = getScatteringAnglePhotonFrame(photonEnergy);
+    		thetaLab = getScatteringAngleLabFrame(thetaLab, scatteringAngle);
 
-    		photonDir[0] = std::sin(theta) * std::cos(phi);
-    		photonDir[1] = std::sin(theta) * std::sin(phi);
-    		photonDir[2] = std::cos(theta);
+    		photonDir[0] = std::sin(thetaLab) * std::cos(phi);
+    		photonDir[1] = std::sin(thetaLab) * std::sin(phi);
+    		photonDir[2] = std::cos(thetaLab);
 
     		photonPosition[0] += criticalOpticalDepth * photonDir[0];
     		photonPosition[1] += criticalOpticalDepth * photonDir[1];
@@ -69,7 +72,6 @@ int main(){
     			break;
     		}
 
-    		double scatteringAngle = std::sin(theta) * std::cos(phi) * photonDir[0] + std::sin(theta) * std::sin(phi) * photonDir[1] +  std::cos(theta) * photonDir[2];
     		photonEnergy = energyChangeCompton(photonEnergy, scatteringAngle);
 
     	}
@@ -123,8 +125,6 @@ double getInitialPhotonEnergy(void){
 	double minEnergy = 4.;
 	double maxEnergy = 14.;
 
-	double norm = 1/(std::log(maxEnergy) - std::log(minEnergy));
-
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> DistributionZeroToOne(0.0, 1.0);
@@ -133,7 +133,11 @@ double getInitialPhotonEnergy(void){
 
 }
 
-double getScatteringAngle(double photonEnergy){
+double getScatteringAngleLabFrame(double thetaLab, double scatteringAngle){
+	return thetaLab + scatteringAngle;
+}
+
+double getScatteringAnglePhotonFrame(double photonEnergy){
 	double ScatteringAngle = 0.;
 	double MinAngle = 0.;
 	double MaxAngle = M_PI;
@@ -161,6 +165,20 @@ double getScatteringAngle(double photonEnergy){
 
 	return ScatteringAngle;
 
+}
+
+void initialisePhotonDir(double (&photonDir)[3]){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> azimuth(0.0, 2 * M_PI);
+    std::uniform_real_distribution<> inclination(-1., 1.);
+
+	double phi      = azimuth(gen);
+	double thetaLab = std::acos(inclination(gen));
+
+	photonDir[0] = std::sin(thetaLab) * std::cos(phi);
+	photonDir[1] = std::sin(thetaLab) * std::sin(phi);
+	photonDir[2] = std::cos(thetaLab);
 }
 
 double KleinNishinaCumulativeDistribution(double photonEnergy, double theta){
