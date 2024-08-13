@@ -13,9 +13,17 @@
 #include <random>
 #include <fstream>
 
+#include "Electron.h"
+#include "ElectronMaxwellBoltzmann.h"
+
 #include "Photon.h"
 #include "PhotonSpectrum.h"
 #include "PhotonSpectrumPowerLaw.h"
+#include "PhotonSpectrumSingleFrequency.h"
+
+#include "Scatter.h"
+#include "ScatterCompton.h"
+
 
 
 #endif /* SRC_SIMULATIONDEPENDENCIES_H_ */

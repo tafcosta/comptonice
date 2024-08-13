@@ -15,8 +15,7 @@ public:
 	PhotonSpectrum(Photon &photon);
 	virtual ~PhotonSpectrum();
 
-	virtual void setInitialPhotonEnergy(){};
-
+	void virtual setPhotonEnergy(){};
 protected:
 	Photon &photon;
 };
