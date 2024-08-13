@@ -13,6 +13,7 @@
 #include <random>
 #include <fstream>
 
+#include "Photon.h"
 #include "PhotonSpectrum.h"
 #include "PhotonSpectrumPowerLaw.h"
 

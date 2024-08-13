@@ -8,12 +8,17 @@
 #ifndef SRC_PHOTONSPECTRUM_H_
 #define SRC_PHOTONSPECTRUM_H_
 
+#include "SimulationDependencies.h"
+
 class PhotonSpectrum {
 public:
-	PhotonSpectrum();
+	PhotonSpectrum(Photon &photon);
 	virtual ~PhotonSpectrum();
 
-	virtual double setInitialPhotonEnergy(){return 0.;};
+	virtual void setInitialPhotonEnergy(){};
+
+protected:
+	Photon &photon;
 };
 
 #endif /* SRC_PHOTONSPECTRUM_H_ */

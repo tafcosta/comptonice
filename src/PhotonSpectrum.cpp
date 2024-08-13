@@ -5,9 +5,9 @@
  *      Author: ntc132
  */
 
-#include "PhotonSpectrum.h"
+#include "SimulationDependencies.h"
 
-PhotonSpectrum::PhotonSpectrum() {
+PhotonSpectrum::PhotonSpectrum(Photon &photon) : photon(photon) {
 	// TODO Auto-generated constructor stub
 
 }
