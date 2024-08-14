@@ -12,12 +12,10 @@
 
 class PhotonSpectrum {
 public:
-	PhotonSpectrum(Photon &photon);
+	PhotonSpectrum();
 	virtual ~PhotonSpectrum();
 
-	void virtual setPhotonEnergy(){};
-protected:
-	Photon &photon;
+	double virtual setPhotonEnergy(){};
 };
 
 #endif /* SRC_PHOTONSPECTRUM_H_ */

@@ -16,10 +16,10 @@
 #include "Electron.h"
 #include "ElectronMaxwellBoltzmann.h"
 
-#include "Photon.h"
 #include "PhotonSpectrum.h"
 #include "PhotonSpectrumPowerLaw.h"
 #include "PhotonSpectrumSingleFrequency.h"
+#include "Photon.h"
 
 #include "Scatter.h"
 #include "ScatterCompton.h"
