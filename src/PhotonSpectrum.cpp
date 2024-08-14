@@ -7,8 +7,7 @@
 
 #include "SimulationDependencies.h"
 
-PhotonSpectrum::PhotonSpectrum(Photon &photon) : photon(photon) {
-	// TODO Auto-generated constructor stub
+PhotonSpectrum::PhotonSpectrum() {
 
 }
 
