@@ -1,19 +1,14 @@
 #include "SimulationDependencies.h"
 
+Grid *grid = new Grid(0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1, 128);
 PhotonSpectrum *photonSpectrum = new PhotonSpectrumPowerLaw();
 Scatter *scatter = new ScatterCompton();
 
-int photonEscapes(double criticalOpticalDepth, std::vector<double> position);
-
-static double domainRadius = 30.;
-static int nPhotons = 30000;
+static int nPhotons = 10000;
 
 int main(){
 	double gasTemperatureKeV = 0.001;
 	double coupledEnergy = 0.;
-
-	std::vector<double> energyOut;
-	double criticalOpticalDepth;
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -24,34 +19,28 @@ int main(){
     std::vector<Photon*> photons;
     photons.reserve(nPhotons);
 
+    for(int iPhoton = 0; iPhoton < nPhotons; iPhoton++)
+    	photons.emplace_back(new Photon(*grid, *photonSpectrum));
+
     std::cout << "Start Comptonisation" << std::endl;
 
-    for(int iPhoton = 0; iPhoton < nPhotons; iPhoton++)
-    	photons.emplace_back(new Photon(*photonSpectrum));
-
     for(Photon* photon : photons){
+    	while(photon->insideDomain){
+    		double opticalDepth = -std::log(1 - RandomNumberZeroToOne(gen));
 
-    	while(true){
-    		criticalOpticalDepth = -std::log(1 - RandomNumberZeroToOne(gen));
+    		photon->propagate(opticalDepth);
 
-    		if(photonEscapes(criticalOpticalDepth, photon->position)){
-    			energyOut.push_back(photon->energy);
-    			coupledEnergy += 1 - photon->energy/photon->energyInitial;
-
-    			photon->escaped = true;
+    		if(!photon->insideDomain)
     			break;
-    		}
 
     		scatter->doScattering(photon);
-
-    		for(int i = 0; i < 3; i++)
-    			photon->position[i] += criticalOpticalDepth * photon->direction[i];
     	}
+    	coupledEnergy += 1 - photon->energy/photon->energyInitial;
 	}
 
-    for (const double& element : energyOut) {
-        outputFile << element << " ";
-    }
+    for(Photon* photon : photons)
+        outputFile << photon->direction[0] << " " << photon->direction[1] << " " << photon->direction[2] << std::endl;
+
 
     outputFile.close();
 
@@ -60,14 +49,8 @@ int main(){
     for(Photon* photon : photons)
     	delete photon;
 
+    delete grid;
     delete photonSpectrum;
     delete scatter;
-	return 0;
-}
-
-int photonEscapes(double criticalOpticalDepth, std::vector<double> position){
-	if((position[0]*position[0] + position[1]*position[1] + position[2]*position[2]) > std::pow(domainRadius,2))
-		return 1;
-
 	return 0;
 }

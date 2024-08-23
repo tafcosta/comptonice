@@ -16,6 +16,8 @@
 #include "Electron.h"
 #include "ElectronMaxwellBoltzmann.h"
 
+#include "Grid.h"
+
 #include "PhotonSpectrum.h"
 #include "PhotonSpectrumPowerLaw.h"
 #include "PhotonSpectrumSingleFrequency.h"
