@@ -15,7 +15,7 @@ public:
 	PhotonSpectrum();
 	virtual ~PhotonSpectrum();
 
-	double virtual setPhotonEnergy(){};
+	double virtual setPhotonEnergy(){return 0.;};
 };
 
 #endif /* SRC_PHOTONSPECTRUM_H_ */

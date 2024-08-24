@@ -18,13 +18,14 @@ public:
 
 	double electronRestMassEnergyKeV = 511.0;
 
-	double energyChangeCompton(double photonEnergy, double scatteringAngle);
-	double getScatteringAngleLabFrame(double thetaLab, double scatteringAngle);
+	void energyChangeCompton(Photon* photon, double scatteringAngle);
+	void getPhotonDirectionLabFrame(double phiPhotonFrame, double thetaPhotonFrame, Photon* photon);
 	double getScatteringAnglePhotonFrame(double photonEnergy);
 	double KleinNishinaCumulativeDistribution(double photonEnergy, double theta);
 
 protected:
-	double TOL = 0.0001;
+	double TOL = 1.e-6;
+	int nIterMax = 100;
 };
 
 #endif /* SRC_SCATTERCOMPTON_H_ */

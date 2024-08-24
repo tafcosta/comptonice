@@ -27,19 +27,17 @@ Grid::Grid(double xmin, double xmax, double ymin, double ymax, double zmin, doub
 	minZIndex = nGhost;
 	maxZIndex = nGhost + nCells - 1;
 
-	for(int i = minXIndex; i < maxXIndex; i++){
+	for(int i = minXIndex; i <= maxXIndex; i++){
 		double x = getX(i) - 0.5;
 
-		for(int j = minYIndex; j < maxYIndex; j++){
+		for(int j = minYIndex; j <= maxYIndex; j++){
 			double y = getX(j) - 0.5;
 
-			for(int k = minZIndex; k < maxZIndex; k++){
+			for(int k = minZIndex; k <= maxZIndex; k++){
 				double z = getX(k) - 0.5;
 
-				double radius = std::sqrt(x*x + y*y);
-
-				if((radius < 0.4) && (std::fabs(z) < 0.1))
-					quantities[i][j][k][DENS] = 3.e2;
+				if((std::sqrt(x*x + y*y) < 0.4) && (std::fabs(z) < 0.05))
+					quantities[i][j][k][DENS] = 5e1;
 
 			}
 		}

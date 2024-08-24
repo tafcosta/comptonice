@@ -18,6 +18,8 @@ public:
 
 	double energy;
 	double energyInitial;
+	double thetaLabFrame;
+	double phiLabFrame;
 	bool insideDomain;
 
 	std::vector<double> direction;

@@ -4,7 +4,7 @@ Grid *grid = new Grid(0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1, 128);
 PhotonSpectrum *photonSpectrum = new PhotonSpectrumPowerLaw();
 Scatter *scatter = new ScatterCompton();
 
-static int nPhotons = 10000;
+static int nPhotons = 50000;
 
 int main(){
 	double gasTemperatureKeV = 0.001;
@@ -39,12 +39,11 @@ int main(){
 	}
 
     for(Photon* photon : photons)
-        outputFile << photon->direction[0] << " " << photon->direction[1] << " " << photon->direction[2] << std::endl;
-
+        outputFile << photon->thetaLabFrame << " " << photon->phiLabFrame << std::endl;
 
     outputFile.close();
 
-    std::cout << "Comptonisation done, coupled energy = " << coupledEnergy/nPhotons << std::endl;
+    std::cout << "Comptonisation done, energy transferred from photons = " << coupledEnergy/nPhotons << std::endl;
 
     for(Photon* photon : photons)
     	delete photon;

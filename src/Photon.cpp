@@ -7,22 +7,24 @@
 
 #include "SimulationDependencies.h"
 
-Photon::Photon(Grid &grid, PhotonSpectrum &photonSpectrum) : grid(grid), photonSpectrum(photonSpectrum), insideDomain(true), direction(3, 0.0), position(3, 0.50001){
+Photon::Photon(Grid &grid, PhotonSpectrum &photonSpectrum) : grid(grid), photonSpectrum(photonSpectrum), insideDomain(true), direction(3, 0.0), position(3, 0.5), phiLabFrame(phiLabFrame), thetaLabFrame(thetaLabFrame){
 
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> azimuth(0.0, 2 * M_PI);
-    std::uniform_real_distribution<> inclination(-1., 1.);
+    std::uniform_real_distribution<> cosInclination(-1., 1.);
 
-    double phi      = azimuth(gen);
-	double thetaLab = std::acos(inclination(gen));
+    phiLabFrame = azimuth(gen);
+	thetaLabFrame = std::acos(cosInclination(gen));
 
 	energyInitial = photonSpectrum.setPhotonEnergy();
 	energy = energyInitial;
 
-	direction[0] = std::sin(thetaLab) * std::cos(phi);
-	direction[1] = std::sin(thetaLab) * std::sin(phi);
-	direction[2] = std::cos(thetaLab);
+	position[2] = 0.495;
+
+	direction[0] = std::sin(thetaLabFrame) * std::cos(phiLabFrame);
+	direction[1] = std::sin(thetaLabFrame) * std::sin(phiLabFrame);
+	direction[2] = std::cos(thetaLabFrame);
 }
 
 void Photon::propagate(double opticalDepth){
