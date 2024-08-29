@@ -12,14 +12,17 @@
 
 class Photon {
 public:
-    Photon(Grid &grid, PhotonSpectrum &photonSpectrum);
+    Photon(Grid &grid, PhotonSpectrum &photonSpectrum, int photonIndex);
 
 	virtual ~Photon();
 
 	double energy;
 	double energyInitial;
 	double thetaLabFrame;
+	int nScatters;
+	double path;
 	double phiLabFrame;
+	int photonIndex;
 	bool insideDomain;
 
 	std::vector<double> direction;

@@ -16,9 +16,9 @@ public:
 	virtual ~Grid();
 
 	double dx, dy, dz;
-	double xmin, xmax;
-	double ymin, ymax;
-	double zmin, zmax;
+	double xmin;
+	double ymin;
+	double zmin;
 
 	int minXIndex, maxXIndex;
 	int minYIndex, maxYIndex;

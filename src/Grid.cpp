@@ -7,7 +7,7 @@
 
 #include "SimulationDependencies.h"
 
-Grid::Grid(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax, int nGhost, int nCells) : xmin(xmin), xmax(xmax), ymin(ymin), ymax(ymax), zmin(zmin), zmax(zmax), nGhost(nGhost), nCells(nCells) {
+Grid::Grid(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax, int nGhost, int nCells) : xmin(xmin), ymin(ymin), zmin(zmin), nGhost(nGhost), nCells(nCells) {
 
 	quantities =  std::vector<std::vector<std::vector<std::vector<int> > > > (nCells + 2*nGhost,
 			std::vector<std::vector<std::vector<int> > >(nCells + 2*nGhost,
@@ -37,12 +37,11 @@ Grid::Grid(double xmin, double xmax, double ymin, double ymax, double zmin, doub
 				double z = getX(k) - 0.5;
 
 				if((std::sqrt(x*x + y*y) < 0.4) && (std::fabs(z) < 0.05))
-					quantities[i][j][k][DENS] = 5e1;
+					quantities[i][j][k][DENS] = 2.e2;
 
 			}
 		}
 	}
-
 }
 
 Grid::~Grid() {
