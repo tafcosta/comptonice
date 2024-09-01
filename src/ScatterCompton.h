@@ -14,11 +14,13 @@ class ScatterCompton: public Scatter {
 public:
 	virtual ~ScatterCompton();
 
-	void doScattering(Photon*) override;
+	void doScattering(Electron*, Photon*) override;
 
 	double electronRestMassEnergyKeV = 511.0;
 
 	void energyChangeCompton(Photon* photon, double scatteringAngle);
+	void getEnergyInLabeFrame(Electron* electron, Photon* photon, double cosBetweenPhotonElectron);
+
 	void getPhotonDirectionLabFrame(double phiPhotonFrame, double thetaPhotonFrame, Photon* photon);
 	double getScatteringAnglePhotonFrame(double photonEnergy);
 	double KleinNishinaCumulativeDistribution(double photonEnergy, double theta);

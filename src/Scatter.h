@@ -15,7 +15,7 @@ public:
 	Scatter();
 	virtual ~Scatter();
 
-	virtual void doScattering(Photon*){};
+	virtual void doScattering(Electron*, Photon*){};
 
 };
 

@@ -6,11 +6,10 @@
  */
 
 #include "SimulationDependencies.h"
-#include <iomanip>  // For std::setw and std::setfill
-#include <sstream> // For std::ostringstream
+#include <iomanip>
+#include <sstream>
 
 Photon::Photon(Grid &grid, PhotonSpectrum &photonSpectrum, int photonIndex) : grid(grid), photonSpectrum(photonSpectrum), photonIndex(photonIndex), insideDomain(true), direction(3, 0.0), nScatters(nScatters), path(path), position(3, 0.5), phiLabFrame(phiLabFrame), thetaLabFrame(thetaLabFrame){
-
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> azimuth(0.0, 2 * M_PI);
@@ -38,6 +37,7 @@ void Photon::propagate(double opticalDepth){
 	std::array<int, 3> indices = grid.getCellIndex(position);
 	std::array<int, 3> indicesTmp;
 
+	/*
     std::ostringstream filename;
     filename << "PhotonTrajectory_"
              << std::setw(4) << std::setfill('0')
@@ -46,6 +46,7 @@ void Photon::propagate(double opticalDepth){
 
     std::ofstream outputFile(filename.str(), std::ios::app);
     outputFile << position[0] << " " << position[1] << " " << position[2] << " " << energy << std::endl;
+    */
 
 	while(propagate){
 		double distanceToEdge = 1.e10;
@@ -149,10 +150,10 @@ void Photon::propagate(double opticalDepth){
 		if((indices[0] >= grid.maxXIndex) || (indices[0] <= grid.minXIndex) || (indices[1] >= grid.maxYIndex) || (indices[1] <= grid.minYIndex) || (indices[2] >= grid.maxZIndex) || (indices[2] <= grid.minZIndex)){
 			propagate = false;
 			insideDomain = false;
-		    outputFile << position[0] << " " << position[1] << " " << position[2] << " " << energy << std::endl;
+		    //outputFile << position[0] << " " << position[1] << " " << position[2] << " " << energy << std::endl;
 		}
 	}
-	outputFile.close();
+	//outputFile.close();
 }
 
 Photon::~Photon() {

@@ -7,11 +7,11 @@
 
 #include "SimulationDependencies.h"
 
-ElectronMaxwellBoltzmann::ElectronMaxwellBoltzmann() {
+ElectronMaxwellBoltzmann::ElectronMaxwellBoltzmann(Grid &grid) : Electron(grid){
 
 }
 
-double ElectronMaxwellBoltzmann::getElectronSpeed(double gasTemperatureKeV){
+void ElectronMaxwellBoltzmann::getElectronSpeed(Photon* photon){
 	double electronSpeed = 0.;
 	double MinBeta  = 0.;
 	double MaxBeta  = 1.;
@@ -20,9 +20,12 @@ double ElectronMaxwellBoltzmann::getElectronSpeed(double gasTemperatureKeV){
     std::uniform_real_distribution<> DistributionZeroToOne(0.0, 1.0);
     std::mt19937 gen(rd());
 
+    std::array<int, 3> indices = grid.getCellIndex(photon->position);
+    double gasTemperatureKeV = grid.quantities[indices[0]][indices[1]][indices[2]][grid.TEMP];
+
     double randomNumber = DistributionZeroToOne(gen);
 
-	for(int nIter = 0; nIter < 100; nIter++){
+	for(int nIter = 0; nIter < nIterMax; nIter++){
 		double lowerLimit = MaxwellBoltzmannCumulativeDistribution(MinBeta, gasTemperatureKeV) - randomNumber;
 		double midPoint   = MaxwellBoltzmannCumulativeDistribution((MinBeta + MaxBeta)/2., gasTemperatureKeV) - randomNumber;
 
@@ -37,7 +40,8 @@ double ElectronMaxwellBoltzmann::getElectronSpeed(double gasTemperatureKeV){
 			MaxBeta = (MinBeta + MaxBeta)/2.;
 	}
 
-	return electronSpeed;
+	speed = electronSpeed;
+	gamma = 1.0 / std::sqrt(1 - speed * speed);
 }
 
 

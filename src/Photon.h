@@ -13,7 +13,6 @@
 class Photon {
 public:
     Photon(Grid &grid, PhotonSpectrum &photonSpectrum, int photonIndex);
-
 	virtual ~Photon();
 
 	double energy;

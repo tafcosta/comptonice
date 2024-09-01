@@ -4,12 +4,9 @@ Grid *grid = new Grid(0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1, 256);
 PhotonSpectrum *photonSpectrum = new PhotonSpectrumPowerLaw();
 Scatter *scatter = new ScatterCompton();
 
-static int nPhotons = 10000;
+static int nPhotons = 100000;
 
 int main(){
-	double gasTemperatureKeV = 0.001;
-	double coupledEnergy = 0.;
-
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> RandomNumberZeroToOne(0.0, 1.0);
@@ -24,17 +21,31 @@ int main(){
 
     std::cout << "Start Comptonisation" << std::endl;
 
+    size_t totalPhotons = photons.size();
+    size_t counter = 0;
+    int nextProgress = 5; // Start with the first progress threshold at 5%
+
     for(Photon* photon : photons){
+
     	while(photon->insideDomain){
     		double opticalDepth = -std::log(1 - RandomNumberZeroToOne(gen));
 
     		photon->propagate(opticalDepth);
-    		if(!photon->insideDomain)
-    			break;
 
-    		scatter->doScattering(photon);
+    		if(photon->insideDomain){
+    			Electron *electron = new ElectronMaxwellBoltzmann(*grid);
+    			scatter->doScattering(electron, photon);
+    			delete electron;
+    		}
     	}
-    	coupledEnergy += 1 - photon->energy/photon->energyInitial;
+
+    	counter++;
+        float progress = (static_cast<float>(counter) / totalPhotons) * 100;
+        if (progress >= nextProgress) {
+            std::cout << "Progress: " << nextProgress << "%\r" << std::flush;
+            nextProgress += 5; // Set the next progress threshold
+        }
+
 	}
 
     for(Photon* photon : photons){
@@ -43,7 +54,7 @@ int main(){
 
     outputFile.close();
 
-    std::cout << "Comptonisation done, energy transferred from photons = " << coupledEnergy/nPhotons << std::endl;
+    std::cout << "Comptonisation done." << std::endl;
 
     for(Photon* photon : photons)
     	delete photon;

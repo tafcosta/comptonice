@@ -25,10 +25,9 @@ public:
 	int minZIndex, maxZIndex;
 
 	int nGhost, nCells;
-
 	int nvar = 2;
 
-	std::vector<std::vector<std::vector<std::vector<int> > > > quantities;
+	std::vector<std::vector<std::vector<std::vector<double> > > > quantities;
 
 	static const int DENS   = 0;
 	static const int TEMP   = 1;

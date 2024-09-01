@@ -11,8 +11,8 @@ PhotonSpectrumPowerLaw::PhotonSpectrumPowerLaw(){
 }
 
 double PhotonSpectrumPowerLaw::setPhotonEnergy(){
-	double minEnergy = 4.;
-	double maxEnergy = 14.;
+	double minEnergy = 4;
+	double maxEnergy = 14;
 
     std::random_device rd;
     std::mt19937 gen(rd());

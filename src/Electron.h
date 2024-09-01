@@ -5,17 +5,28 @@
  *      Author: ntc132
  */
 
+#include "SimulationDependencies.h"
+#include "Grid.h"
+
 #ifndef SRC_ELECTRON_H_
 #define SRC_ELECTRON_H_
 
 class Electron {
 public:
-	Electron();
+	Electron(Grid &grid);
 	virtual ~Electron();
+	virtual void getElectronSpeed(Photon* photon){};
 
-	virtual double getElectronSpeed(double gasTemperatureKeV){};
+	std::vector<double> direction;
+	double phiLabFrame;
+	double thetaLabFrame;
+	double speed;
+	double gamma;
 
-	double electronRestMassEnergyKeV = 511.0;
+	static const double electronRestMassEnergyKeV = 511.0;
+
+protected:
+	Grid &grid;
 };
 
 #endif /* SRC_ELECTRON_H_ */

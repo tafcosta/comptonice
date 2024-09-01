@@ -7,22 +7,31 @@
 
 #include "SimulationDependencies.h"
 
-void ScatterCompton::doScattering(Photon* photon) {
+void ScatterCompton::doScattering(Electron* electron, Photon* photon) {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_real_distribution<> azimuth(0.0, 2 * M_PI);
 
+	electron->getElectronSpeed(photon);
+
+	double cosBetweenPhotonElectron = electron->direction[0] * photon->direction[0] + electron->direction[1] * photon->direction[1] + electron->direction[2] * photon->direction[2];
+
 	double phiPhotonFrame = azimuth(gen);
-	double thetaPhotonFrame = getScatteringAnglePhotonFrame(photon->energy);
+	double thetaPhotonFrame = getScatteringAnglePhotonFrame(electron->gamma * (1 + cosBetweenPhotonElectron * electron->speed) * photon->energy);
 
 	getPhotonDirectionLabFrame(phiPhotonFrame, thetaPhotonFrame, photon);
-
 	energyChangeCompton(photon, thetaPhotonFrame);
+	getEnergyInLabeFrame(electron, photon, cosBetweenPhotonElectron);
+
 	photon->nScatters += 1;
 }
 
 void ScatterCompton::energyChangeCompton(Photon* photon, double scatteringAngle){
 	 photon->energy = photon->energy / (1 + photon->energy/electronRestMassEnergyKeV * (1 - std::cos(scatteringAngle)));
+}
+
+void ScatterCompton::getEnergyInLabeFrame(Electron* electron, Photon* photon, double cosBetweenPhotonElectron){
+	photon->energy = photon->energy * electron->gamma * (1 - cosBetweenPhotonElectron * electron->speed);
 }
 
 void ScatterCompton::getPhotonDirectionLabFrame(double phiPhotonFrame, double thetaPhotonFrame, Photon* photon){
